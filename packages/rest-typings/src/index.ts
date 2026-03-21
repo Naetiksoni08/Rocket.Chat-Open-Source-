@@ -18,6 +18,7 @@ import type { ImEndpoints, DmEndpoints } from './v1/dm';
 import type { E2eEndpoints } from './v1/e2e';
 import type { EmailInboxEndpoints } from './v1/email-inbox';
 import type { EmojiCustomEndpoints } from './v1/emojiCustom';
+import type { MentionCustomEndpoints } from './v1/customMentions';
 import type { FederationEndpoints } from './v1/federation';
 import type { GroupsEndpoints } from './v1/groups';
 import type { ImportEndpoints } from './v1/import';
@@ -58,6 +59,7 @@ export interface Endpoints
 		DmEndpoints,
 		DirectoryEndpoint,
 		EmojiCustomEndpoints,
+		MentionCustomEndpoints,
 		GroupsEndpoints,
 		ImEndpoints,
 		LDAPEndpoints,
@@ -229,6 +231,7 @@ export * from './helpers/PaginatedResult';
 export * from './helpers/ReplacePlaceholders';
 export * from './helpers/WithItemCount';
 export * from './v1/emojiCustom';
+export * from './v1/customMentions'; 
 export * from './v1/instances';
 export * from './v1/ldap';
 export * from './v1/users';

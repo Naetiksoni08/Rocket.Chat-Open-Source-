@@ -1,4 +1,4 @@
-import type { ILivechatDepartmentAgents, ILivechatInquiryRecord, ISubscription, RocketChatRecordDeleted } from '@rocket.chat/core-typings';
+import { type ILivechatDepartmentAgents, type ILivechatInquiryRecord, type ISubscription, type RocketChatRecordDeleted } from '@rocket.chat/core-typings';
 import type {
 	IAnalyticsModel,
 	IAvatarsModel,
@@ -7,6 +7,7 @@ import type {
 	ICannedResponseModel,
 	ICredentialTokensModel,
 	ICustomSoundsModel,
+	IMentionCustomModel,
 	ICustomUserStatusModel,
 	IEmailInboxModel,
 	IEmailMessageHistoryModel,
@@ -136,6 +137,7 @@ export const CustomUserStatus = proxify<ICustomUserStatusModel>('ICustomUserStat
 export const EmailInbox = proxify<IEmailInboxModel>('IEmailInboxModel');
 export const EmailMessageHistory = proxify<IEmailMessageHistoryModel>('IEmailMessageHistoryModel');
 export const EmojiCustom = proxify<IEmojiCustomModel>('IEmojiCustomModel');
+export const MentionCustom = proxify<IMentionCustomModel>('IMentionCustomModel');
 export const ExportOperations = proxify<IExportOperationsModel>('IExportOperationsModel');
 export const FederationKeys = proxify<IFederationKeysModel>('IFederationKeysModel');
 export const FederationRoomEvents = proxify<IFederationRoomEventsModel>('IFederationRoomEventsModel');

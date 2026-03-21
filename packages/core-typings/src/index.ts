@@ -49,6 +49,7 @@ export * from './INps';
 export * from './ISession';
 export * from './IEmoji';
 export * from './IEmojiCustom';
+export * from './IMentionCustom'; 
 export * from './ICustomEmojiDescriptor';
 export * from './IAnalytics';
 export * from './ICredentialToken';

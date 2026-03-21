@@ -132,6 +132,12 @@ export const {
 		permissionGranted: (): boolean => hasPermission('manage-emoji'),
 	},
 	{
+		href: '/admin/custom-mentions',
+		i18nLabel: 'Custom_Mentions',
+		icon: 'at',
+		permissionGranted: (): boolean => true,
+	},
+	{
 		href: '/admin/feature-preview',
 		i18nLabel: 'Feature_preview',
 		icon: 'flask',
