@@ -14,6 +14,7 @@ export * from './models/EmailInbox';
 export * from './models/EmailMessageHistory';
 export * from './models/EmojiCustom';
 export * from './models/MentionCustom'; 
+export * from './models/MentionCustomMember';
 export * from './models/ExportOperations';
 export * from './models/FederationKeys';
 export * from './models/FederationRoomEvents';

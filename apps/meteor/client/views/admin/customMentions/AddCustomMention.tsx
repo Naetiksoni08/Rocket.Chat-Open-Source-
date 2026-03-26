@@ -15,8 +15,7 @@ const AddCustomMention = ({ close, onChange }: AddCustomMentionProps): ReactElem
 	const dispatchToastMessage = useToastMessageDispatch();
 
 	const [name, setName] = useState('');
-	const [members, setMembers] = useState('');
-	const [errors, setErrors] = useState({ name: false, members: false });
+	const [errors, setErrors] = useState({ name: false });
 
 	const createMention = useEndpoint('POST', '/v1/custom-mentions.create');
 
@@ -27,32 +26,14 @@ const AddCustomMention = ({ close, onChange }: AddCustomMentionProps): ReactElem
 		setName(e.currentTarget.value);
 	};
 
-	const handleChangeMembers = (e: ChangeEvent<HTMLInputElement>): void => {
-		if (e.currentTarget.value !== '') {
-			setErrors((prev) => ({ ...prev, members: false }));
-		}
-		setMembers(e.currentTarget.value);
-	};
-
 	const handleSave = useCallback(async () => {
-		let hasError = false;
-
 		if (!name.trim()) {
 			setErrors((prev) => ({ ...prev, name: true }));
-			hasError = true;
+			return;
 		}
-
-		if (!members.trim()) {
-			setErrors((prev) => ({ ...prev, members: true }));
-			hasError = true;
-		}
-
-		if (hasError) return;
-
-		const usernames = members.split(',').map((m) => m.trim()).filter(Boolean);
 
 		try {
-			await createMention({ name: name.trim().replace('@', ''), usernames })
+			await createMention({ name: name.trim().replace('@', '') });
 			dispatchToastMessage({
 				type: 'success',
 				message: t('Custom_Mention_Added_Successfully'),
@@ -65,7 +46,7 @@ const AddCustomMention = ({ close, onChange }: AddCustomMentionProps): ReactElem
 				message: error instanceof Error ? error.message : JSON.stringify(error),
 			});
 		}
-	}, [name, members, createMention, dispatchToastMessage, t, onChange, close]);
+	}, [name, createMention, dispatchToastMessage, t, onChange, close]);
 
 	return (
 		<>
@@ -76,7 +57,7 @@ const AddCustomMention = ({ close, onChange }: AddCustomMentionProps): ReactElem
 						<TextInput
 							value={name}
 							onChange={handleChangeName}
-							placeholder={t('Custom_Mention_Name_Placeholder')}
+							placeholder='e.g. backend, frontend, design'
 							addon='@'
 						/>
 					</FieldRow>
@@ -84,22 +65,7 @@ const AddCustomMention = ({ close, onChange }: AddCustomMentionProps): ReactElem
 						<FieldError>{t('Required_field', { field: t('Name') })}</FieldError>
 					)}
 				</Field>
-
-				<Field>
-					<FieldLabel>{t('Members')}</FieldLabel>
-					<FieldRow>
-						<TextInput
-							value={members}
-							onChange={handleChangeMembers}
-							placeholder={t('Custom_Mention_Members_Placeholder')}
-						/>
-					</FieldRow>
-					{errors.members && (
-						<FieldError>{t('Required_field', { field: t('Members') })}</FieldError>
-					)}
-				</Field>
 			</ContextualbarScrollableContent>
-
 			<ContextualbarFooter>
 				<ButtonGroup stretch>
 					<Button onClick={close}>{t('Cancel')}</Button>

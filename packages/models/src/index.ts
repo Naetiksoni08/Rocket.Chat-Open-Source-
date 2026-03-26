@@ -8,6 +8,7 @@ import type {
 	ICredentialTokensModel,
 	ICustomSoundsModel,
 	IMentionCustomModel,
+	IMentionCustomMemberModel,
 	ICustomUserStatusModel,
 	IEmailInboxModel,
 	IEmailMessageHistoryModel,
@@ -138,6 +139,7 @@ export const EmailInbox = proxify<IEmailInboxModel>('IEmailInboxModel');
 export const EmailMessageHistory = proxify<IEmailMessageHistoryModel>('IEmailMessageHistoryModel');
 export const EmojiCustom = proxify<IEmojiCustomModel>('IEmojiCustomModel');
 export const MentionCustom = proxify<IMentionCustomModel>('IMentionCustomModel');
+export const MentionCustomMember = proxify<IMentionCustomMemberModel>('IMentionCustomMemberModel');
 export const ExportOperations = proxify<IExportOperationsModel>('IExportOperationsModel');
 export const FederationKeys = proxify<IFederationKeysModel>('IFederationKeysModel');
 export const FederationRoomEvents = proxify<IFederationRoomEventsModel>('IFederationRoomEventsModel');

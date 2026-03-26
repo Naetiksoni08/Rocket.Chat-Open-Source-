@@ -3,7 +3,7 @@ import type { IMessageService } from '@rocket.chat/core-services';
 import { Authorization, ServiceClassInternal } from '@rocket.chat/core-services';
 import { isEditedMessage } from '@rocket.chat/core-typings';
 import type { MessageUrl, IMessage, MessageTypesValues, IUser, IRoom, AtLeast } from '@rocket.chat/core-typings';
-import { Messages, Rooms } from '@rocket.chat/models';
+import { Messages, Rooms, MentionCustom, MentionCustomMember, Users } from '@rocket.chat/models';
 
 import { OEmbed } from './hooks/AfterSaveOEmbed';
 import { deleteMessage } from '../../../app/lib/server/functions/deleteMessage';
@@ -28,6 +28,7 @@ import { BeforeSavePreventMention } from './hooks/BeforeSavePreventMention';
 import { BeforeSaveSpotify } from './hooks/BeforeSaveSpotify';
 import { closeUnclosedCodeBlock } from '../../../lib/utils/closeUnclosedCodeBlock';
 import { shouldBreakInVersion } from '../../lib/shouldBreakInVersion';
+import { promise } from 'zod';
 
 const disableMarkdownParser = ['yes', 'true'].includes(String(process.env.DISABLE_MESSAGE_PARSER).toLowerCase());
 
@@ -245,6 +246,27 @@ export class MessageService extends ServiceClassInternal implements IMessageServ
 		}
 		message = await this.markdownParser.parseMarkdown({ message, config: this.getMarkdownConfig() });
 		message = await mentionServer.execute(message);
+		const mentionNames = message.msg.match(/@(\w+)/g);
+		if (mentionNames) {
+			const cleanNames = mentionNames.map(name => name.replace('@', ''));
+			const customMentions = await Promise.all(
+				cleanNames.map(name => MentionCustom.findOneByName((name)))
+			)
+			const validMentions = customMentions.filter(mention => mention !== null);
+			const memberResults = await Promise.all(
+				validMentions.map(mention => MentionCustomMember.findByMentionId(mention._id).toArray())
+			)
+			const allMembers = memberResults.flat();
+			const userIds = allMembers.map(member => member.userId);
+			const uniqueUserIds = [...new Set(userIds)];
+			const users = await Users.findByIds(uniqueUserIds).toArray();
+			const newMentions = users.map(user => ({ _id: user._id, username: user.username }));
+			message.mentions = message.mentions || [];
+			const existingIds = new Set(message.mentions.map(m => m._id));
+			const filteredMentions = newMentions.filter(m => !existingIds.has(m._id));
+			message.mentions.push(...filteredMentions);
+		}
+
 		if (parseUrls) {
 			message.urls = parseUrlsInMessage(message, previewUrls);
 		}
@@ -284,9 +306,9 @@ export class MessageService extends ServiceClassInternal implements IMessageServ
 	private getMarkdownConfig() {
 		const customDomains = settings.get<string>('Message_CustomDomain_AutoLink')
 			? settings
-					.get<string>('Message_CustomDomain_AutoLink')
-					.split(',')
-					.map((domain) => domain.trim())
+				.get<string>('Message_CustomDomain_AutoLink')
+				.split(',')
+				.map((domain) => domain.trim())
 			: [];
 
 		return {

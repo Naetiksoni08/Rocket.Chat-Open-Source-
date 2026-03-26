@@ -95,7 +95,7 @@ const CustomMention = ({ onClick, reload }: CustomMentionProps) => {
 										<Box withTruncatedText>@{mention.name}</Box>
 									</GenericTableCell>
 									<GenericTableCell color='default'>
-										<Box withTruncatedText>{mention.usernames.join(', ')}</Box>
+									<Box withTruncatedText>xyz</Box>
 									</GenericTableCell>
 								</GenericTableRow>
 							))}

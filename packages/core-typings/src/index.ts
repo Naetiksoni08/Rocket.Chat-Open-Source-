@@ -50,6 +50,7 @@ export * from './ISession';
 export * from './IEmoji';
 export * from './IEmojiCustom';
 export * from './IMentionCustom'; 
+export * from './IMentionCustomMember';
 export * from './ICustomEmojiDescriptor';
 export * from './IAnalytics';
 export * from './ICredentialToken';

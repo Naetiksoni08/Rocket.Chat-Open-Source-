@@ -17,6 +17,7 @@ import {
 	EmailMessageHistoryRaw,
 	EmojiCustomRaw,
 	MentionCustomRaw,
+	MentionCustomMemberRaw,
 	ExportOperationsRaw,
 	FederationKeysRaw,
 	FederationRoomEventsRaw,
@@ -99,6 +100,7 @@ registerModel('IEmailInboxModel', new EmailInboxRaw(db));
 registerModel('IEmailMessageHistoryModel', new EmailMessageHistoryRaw(db));
 registerModel('IEmojiCustomModel', new EmojiCustomRaw(db, trashCollection));
 registerModel('IMentionCustomModel', new MentionCustomRaw(db)); 
+registerModel('IMentionCustomMemberModel',new MentionCustomMemberRaw(db));
 registerModel('IExportOperationsModel', new ExportOperationsRaw(db));
 registerModel('IFederationKeysModel', new FederationKeysRaw(db));
 registerModel('IFederationRoomEventsModel', new FederationRoomEventsRaw(db));

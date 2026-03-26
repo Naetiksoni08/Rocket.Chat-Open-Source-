@@ -12,6 +12,7 @@ export * from './models/IEmailInboxModel';
 export * from './models/IEmailMessageHistoryModel';
 export * from './models/IEmojiCustomModel';
 export * from './models/IMentionCustomModel';
+export * from './models/IMentionCustomMemberModel';
 export * from './models/IExportOperationsModel';
 export * from './models/IFederationKeysModel';
 export * from './models/IInstanceStatusModel';

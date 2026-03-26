@@ -1,5 +1,4 @@
 import type { KeyOfEach } from '@rocket.chat/core-typings';
-
 import type { AppsEndpoints } from './apps';
 import type { DefaultEndpoints } from './default';
 import type { ReplacePlaceholders } from './helpers/ReplacePlaceholders';
