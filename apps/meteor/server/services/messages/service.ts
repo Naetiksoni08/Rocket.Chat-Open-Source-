@@ -28,7 +28,6 @@ import { BeforeSavePreventMention } from './hooks/BeforeSavePreventMention';
 import { BeforeSaveSpotify } from './hooks/BeforeSaveSpotify';
 import { closeUnclosedCodeBlock } from '../../../lib/utils/closeUnclosedCodeBlock';
 import { shouldBreakInVersion } from '../../lib/shouldBreakInVersion';
-import { promise } from 'zod';
 
 const disableMarkdownParser = ['yes', 'true'].includes(String(process.env.DISABLE_MESSAGE_PARSER).toLowerCase());
 
@@ -260,11 +259,30 @@ export class MessageService extends ServiceClassInternal implements IMessageServ
 			const userIds = allMembers.map(member => member.userId);
 			const uniqueUserIds = [...new Set(userIds)];
 			const users = await Users.findByIds(uniqueUserIds).toArray();
+			// const newMentions = users.map(user => ({ _id: user._id, username: user.username }));
+			// message.mentions = message.mentions || [];
+			// const existingIds = new Set(message.mentions.map(m => m._id));
+			// const filteredMentions = newMentions.filter(m => !existingIds.has(m._id));
+			// message.mentions.push(...filteredMentions);
 			const newMentions = users.map(user => ({ _id: user._id, username: user.username }));
 			message.mentions = message.mentions || [];
 			const existingIds = new Set(message.mentions.map(m => m._id));
+
+			// Push resolved member users
 			const filteredMentions = newMentions.filter(m => !existingIds.has(m._id));
 			message.mentions.push(...filteredMentions);
+
+			// Push group markers so client can identify custom mentions
+			const existingGroupIds = new Set(
+				message.mentions
+					.filter((m: any) => m.type === 'custom-group')
+					.map((m: any) => m._id)
+			);
+			const groupMarkers = validMentions
+				.filter(mention => !existingGroupIds.has(mention._id))
+				.map(mention => ({ _id: mention._id, type: 'custom-group' as const }));
+
+			message.mentions.push(...groupMarkers as any);
 		}
 
 		if (parseUrls) {
