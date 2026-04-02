@@ -280,7 +280,20 @@ export class MessageService extends ServiceClassInternal implements IMessageServ
 			);
 			const groupMarkers = validMentions
 				.filter(mention => !existingGroupIds.has(mention._id))
-				.map(mention => ({ _id: mention._id, type: 'custom-group' as const }));
+				.map((mention, index) => {
+					const mentionMembers = memberResults[index];
+					const memberUsernames = mentionMembers.map(member => {
+						const user = users.find(u => u._id === member.userId);
+						return user?.username || '';
+					}).filter(Boolean);
+					
+					return { 
+						_id: mention._id, 
+						username: mention.name, 
+						type: 'custom-group' as const,
+						members: memberUsernames 
+					};
+				})
 
 			message.mentions.push(...groupMarkers as any);
 		}

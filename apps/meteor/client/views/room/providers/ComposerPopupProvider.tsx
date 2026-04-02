@@ -136,7 +136,7 @@ const ComposerPopupProvider = ({ children, room }: ComposerPopupProviderProps) =
 							.map((m) => ({
 								_id: m._id,
 								username: m.name,
-								name: `👥 ${m.usernames.join(', ')}`,
+								name: `👥 Custom Group`,
 								system: true,
 								sort: 3,
 							}));

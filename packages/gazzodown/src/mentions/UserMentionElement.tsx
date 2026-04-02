@@ -45,7 +45,13 @@ const UserMentionElement = ({ mention }: UserMentionElementProps): ReactElement 
 	return (
 		<MessageHighlight
 			variant={resolved._id === ownUserId ? 'critical' : 'other'}
-			title={resolved._id === ownUserId ? t('Mentions_you') : t('Mentions_user')}
+			title={
+				(resolved as any)?.type === 'custom-group'
+					? `Members: ${(resolved as any)?.members?.join(', ')}`
+					: resolved._id === ownUserId 
+						? t('Mentions_you') 
+						: t('Mentions_user')
+			}
 			clickable
 			{...buttonProps}
 			{...triggerProps}
