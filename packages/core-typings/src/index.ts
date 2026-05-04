@@ -47,6 +47,17 @@ export type * from './IExportOperation';
 export type * from './INotification';
 export * from './INps';
 
+export * from './ISession';
+export * from './IEmoji';
+export * from './IEmojiCustom';
+export * from './IMentionCustom'; 
+export * from './IMentionCustomMember';
+export * from './ICustomEmojiDescriptor';
+export * from './IAnalytics';
+export * from './ICredentialToken';
+export * from './IAvatar';
+export * from './ICustomUserStatus';
+export * from './IEmailMessageHistory';
 export type * from './ISession';
 export type * from './IEmoji';
 export type * from './IEmojiCustom';

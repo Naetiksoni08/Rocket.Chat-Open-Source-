@@ -81,12 +81,22 @@ const GazzodownText = ({ mentions, channels, searchText, children }: GazzodownTe
 				return;
 			}
 
+			const found = mentions?.find(m => m.username === username);
+			if ((found as any)?.type === 'custom-group') {
+				// TODO: show tooltip with members
+				return (event: UIEvent): void => {
+					event.stopPropagation();
+					// Abhi ke liye console.log, baad mein tooltip banayenge
+					console.log('Custom group members:', (found as any)?.members);
+				};
+			}
+
 			return (event: UIEvent): void => {
 				event.stopPropagation();
 				openUserCard(event, username);
 			};
 		},
-		[openUserCard],
+		[openUserCard, mentions],
 	);
 
 	const goToRoom = useGoToRoom();

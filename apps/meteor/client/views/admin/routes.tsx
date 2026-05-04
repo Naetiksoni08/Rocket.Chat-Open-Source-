@@ -56,6 +56,10 @@ declare module '@rocket.chat/ui-contexts' {
 			pathname: `/admin/emoji${`/${string}` | ''}${`/${string}` | ''}`;
 			pattern: '/admin/emoji/:context?/:id?';
 		};
+		'custom-mentions': {
+			pathname: `/admin/custom-mentions${`/${string}` | ''}${`/${string}` | ''}`;
+			pattern: '/admin/custom-mentions/:context?/:id?';
+		};
 		'admin-users': {
 			pathname: `/admin/users${`/${string}` | ''}${`/${string}` | ''}`;
 			pattern: '/admin/users/:context?/:id?';
@@ -180,6 +184,11 @@ registerAdminRoute('/user-status/:context?/:id?', {
 registerAdminRoute('/emoji/:context?/:id?', {
 	name: 'emoji-custom',
 	component: lazy(() => import('./customEmoji/CustomEmojiRoute')),
+});
+
+registerAdminRoute('/custom-mentions/:context?/:id?', {
+	name: 'custom-mentions',
+	component: lazy(() => import('./customMentions/CustomMentionRoute')),
 });
 
 registerAdminRoute('/users/:context?/:id?', {

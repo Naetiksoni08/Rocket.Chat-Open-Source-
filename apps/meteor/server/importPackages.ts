@@ -15,6 +15,7 @@ import '../app/dolphin/server';
 import '../app/drupal/server';
 import '../app/emoji/server';
 import '../app/emoji-custom/server';
+import '../app/custom-mentions/server'; 
 import '../app/emoji-emojione/server';
 import '../app/error-handler/server';
 import '../app/file/server';

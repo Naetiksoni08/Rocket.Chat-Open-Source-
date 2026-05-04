@@ -28,6 +28,7 @@ import { ComposerPopupContext, createMessageBoxPopupConfig } from '../contexts/C
 import useCannedResponsesQuery from './hooks/useCannedResponsesQuery';
 import { normalizeUsername } from '../../../../lib/utils/normalizeUsername';
 import { pipe } from '../../../lib/cachedStores/pipe';
+import { useEndpoint } from '@rocket.chat/ui-contexts';
 
 export type CannedResponse = { _id: string; shortcut: string; text: string };
 
@@ -83,6 +84,7 @@ const ComposerPopupProvider = ({ children, room }: ComposerPopupProviderProps) =
 	const encrypted = isRoomEncrypted && e2eEnabled && !unencryptedMessagesAllowed;
 	const queryClient = useQueryClient();
 	const uid = useUserId();
+	const getCustomMentions = useEndpoint('GET', '/v1/custom-mentions.list');
 	const call = useMethod('getSlashCommandPreviews');
 
 	const value: ComposerPopupContextValue = useMemo(() => {
@@ -124,6 +126,23 @@ const ComposerPopupProvider = ({ children, room }: ComposerPopupProviderProps) =
 							name: t('Notify_active_in_this_room'),
 							sort: 4,
 						});
+					}
+
+					// Custom mention groups
+					try {
+						const { mentions } = await getCustomMentions({ count: 50, offset: 0 });
+						const customItems = mentions
+							.filter((m) => !filterRegex || filterRegex.test(m.name))
+							.map((m) => ({
+								_id: m._id,
+								username: m.name,
+								name: `👥 Custom Group`,
+								system: true,
+								sort: 3,
+							}));
+						items.push(...customItems);
+					} catch (e) {
+						// silent fail
 					}
 
 					return [...roomMessageUsers, ...items];
@@ -170,8 +189,8 @@ const ComposerPopupProvider = ({ children, room }: ComposerPopupProviderProps) =
 					const predicate = (record: SubscriptionWithRoom): boolean =>
 						Boolean(
 							(record.fname?.match(filterRegex) || record.name?.match(filterRegex)) &&
-								!record.federated &&
-								(record.t === 'c' || record.t === 'p'),
+							!record.federated &&
+							(record.t === 'c' || record.t === 'p'),
 						);
 
 					const records = transform(Subscriptions.state.filter(predicate));
@@ -185,64 +204,64 @@ const ComposerPopupProvider = ({ children, room }: ComposerPopupProviderProps) =
 				renderItem: ({ item }) => <ComposerBoxPopupRoom {...item} />,
 			}) as any,
 			useEmoji &&
-				createMessageBoxPopupConfig<ComposerBoxPopupEmojiProps>({
-					trigger: ':',
-					title: t('Emoji'),
-					triggerLength: 2,
-					getItemsFromLocal: async (filter: string) => {
-						const exactFinalTone = new RegExp('^tone[1-5]:*$');
-						const colorBlind = new RegExp('tone[1-5]:*$');
-						const seeColor = new RegExp('_t(?:o|$)(?:n|$)(?:e|$)(?:[1-5]|$)(?::|$)$');
+			createMessageBoxPopupConfig<ComposerBoxPopupEmojiProps>({
+				trigger: ':',
+				title: t('Emoji'),
+				triggerLength: 2,
+				getItemsFromLocal: async (filter: string) => {
+					const exactFinalTone = new RegExp('^tone[1-5]:*$');
+					const colorBlind = new RegExp('tone[1-5]:*$');
+					const seeColor = new RegExp('_t(?:o|$)(?:n|$)(?:e|$)(?:[1-5]|$)(?::|$)$');
 
-						const emojiSort = (recents: string[]) => (a: { _id: string }, b: { _id: string }) => {
-							const aExact = a._id === key ? 2 : 0;
-							const bExact = b._id === key ? 2 : 0;
-							const aPartial = a._id.startsWith(key) ? 1 : 0;
-							const bPartial = b._id.startsWith(key) ? 1 : 0;
+					const emojiSort = (recents: string[]) => (a: { _id: string }, b: { _id: string }) => {
+						const aExact = a._id === key ? 2 : 0;
+						const bExact = b._id === key ? 2 : 0;
+						const aPartial = a._id.startsWith(key) ? 1 : 0;
+						const bPartial = b._id.startsWith(key) ? 1 : 0;
 
-							let aScore = aExact + aPartial;
-							let bScore = bExact + bPartial;
+						let aScore = aExact + aPartial;
+						let bScore = bExact + bPartial;
 
-							if (recents.includes(a._id)) {
-								aScore += recents.indexOf(a._id) + 1;
-							}
-							if (recents.includes(b._id)) {
-								bScore += recents.indexOf(b._id) + 1;
-							}
+						if (recents.includes(a._id)) {
+							aScore += recents.indexOf(a._id) + 1;
+						}
+						if (recents.includes(b._id)) {
+							bScore += recents.indexOf(b._id) + 1;
+						}
 
-							if (aScore > bScore) {
-								return -1;
-							}
-							if (aScore < bScore) {
-								return 1;
-							}
-							return 0;
-						};
-						const filterRegex = new RegExp(escapeRegExp(filter), 'i');
-						const key = `:${filter}`;
+						if (aScore > bScore) {
+							return -1;
+						}
+						if (aScore < bScore) {
+							return 1;
+						}
+						return 0;
+					};
+					const filterRegex = new RegExp(escapeRegExp(filter), 'i');
+					const key = `:${filter}`;
 
-						const recents = recentEmojis.map((item) => `:${item}:`);
+					const recents = recentEmojis.map((item) => `:${item}:`);
 
-						const collection = emoji.list;
+					const collection = emoji.list;
 
-						return Object.keys(collection)
-							.map((_id) => {
-								const data = collection[key];
-								return { _id, data };
-							})
-							.filter(
-								({ _id }) =>
-									filterRegex.test(_id) && (exactFinalTone.test(_id.substring(key.length)) || seeColor.test(key) || !colorBlind.test(_id)),
-							)
-							.sort(emojiSort(recents))
-							.slice(0, 10);
-					},
-					getItemsFromServer: async () => {
-						return [];
-					},
-					getValue: (item) => `${item._id.substring(1)}`,
-					renderItem: ({ item }) => <ComposerBoxPopupEmoji {...item} />,
-				}),
+					return Object.keys(collection)
+						.map((_id) => {
+							const data = collection[key];
+							return { _id, data };
+						})
+						.filter(
+							({ _id }) =>
+								filterRegex.test(_id) && (exactFinalTone.test(_id.substring(key.length)) || seeColor.test(key) || !colorBlind.test(_id)),
+						)
+						.sort(emojiSort(recents))
+						.slice(0, 10);
+				},
+				getItemsFromServer: async () => {
+					return [];
+				},
+				getValue: (item) => `${item._id.substring(1)}`,
+				renderItem: ({ item }) => <ComposerBoxPopupEmoji {...item} />,
+			}),
 			createMessageBoxPopupConfig<ComposerBoxPopupEmojiProps>({
 				title: t('Emoji'),
 				trigger: '\\+:',
@@ -339,34 +358,34 @@ const ComposerPopupProvider = ({ children, room }: ComposerPopupProviderProps) =
 				getItemsFromServer: async () => [],
 			}),
 			cannedResponseEnabled &&
-				isOmnichannel &&
-				createMessageBoxPopupConfig<{
-					_id: string;
-					text: string;
-					shortcut: string;
-				}>({
-					title: t('Canned_Responses'),
-					trigger: '!',
-					prefix: '',
-					triggerAnywhere: true,
-					renderItem: ({ item }) => <ComposerBoxPopupCannedResponse {...item} />,
-					getItemsFromLocal: async (filter: string) => {
-						const exp = new RegExp(filter, 'i');
-						// TODO: this is bad, but can only be fixed by refactoring the whole thing
-						const cannedResponses = queryClient.getQueryData<CannedResponse[]>(cannedResponsesQueryKeys.all) ?? [];
-						return cannedResponses
-							.filter((record) => record.shortcut.match(exp))
-							.sort((a, b) => a.shortcut.localeCompare(b.shortcut))
-							.slice(0, 11)
-							.map((record) => ({
-								_id: record._id,
-								text: record.text,
-								shortcut: record.shortcut,
-							}));
-					},
-					getItemsFromServer: async () => [],
-					getValue: (item) => item.text,
-				}),
+			isOmnichannel &&
+			createMessageBoxPopupConfig<{
+				_id: string;
+				text: string;
+				shortcut: string;
+			}>({
+				title: t('Canned_Responses'),
+				trigger: '!',
+				prefix: '',
+				triggerAnywhere: true,
+				renderItem: ({ item }) => <ComposerBoxPopupCannedResponse {...item} />,
+				getItemsFromLocal: async (filter: string) => {
+					const exp = new RegExp(filter, 'i');
+					// TODO: this is bad, but can only be fixed by refactoring the whole thing
+					const cannedResponses = queryClient.getQueryData<CannedResponse[]>(cannedResponsesQueryKeys.all) ?? [];
+					return cannedResponses
+						.filter((record) => record.shortcut.match(exp))
+						.sort((a, b) => a.shortcut.localeCompare(b.shortcut))
+						.slice(0, 11)
+						.map((record) => ({
+							_id: record._id,
+							text: record.text,
+							shortcut: record.shortcut,
+						}));
+				},
+				getItemsFromServer: async () => [],
+				getValue: (item) => item.text,
+			}),
 			createMessageBoxPopupConfig({
 				title: previewTitle,
 				matchSelectorRegex: /(?:^)(\/[\w\d\S]+ )[^]*$/,
@@ -390,6 +409,7 @@ const ComposerPopupProvider = ({ children, room }: ComposerPopupProviderProps) =
 		call,
 		cannedResponseEnabled,
 		encrypted,
+		getCustomMentions,
 		i18n,
 		isOmnichannel,
 		previewTitle,
